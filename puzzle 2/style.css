@@ -1,0 +1,65 @@
+body {
+    background-color: #222;
+    color: white;
+    font-family: Arial;
+}
+#puzzle {
+    text-align: center;
+    margin-top: 100px;
+}
+#panel {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    background-color: #382c21;
+    border: 4px solid #866b41;
+    padding: 12px;
+    width: fit-content;
+    margin: auto;
+}
+.casilla {
+    width: 75px;
+    height: 75px;
+    background-color: #b5a17a;
+    border: 2px solid #786343;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.casilla:hover {
+    background-color: #d2bd91;
+}
+.figura {
+    display: block;
+    background-color: #29241b;
+}
+/* Círculo */
+.circulo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+/* Cuadrado */
+.cuadrado {
+    width: 40px;
+    height: 40px;
+}
+/* Triángulo */
+.triangulo {
+    width: 0;
+    height: 0;
+    background: none;
+    border-left: 22px solid transparent;
+    border-right: 22px solid transparent;
+    border-bottom: 40px solid #29241b;
+}
+/* Rectángulo */
+.rectangulo {
+    width: 50px;
+    height: 25px;
+}
+#mensajePuzzle {
+    font-size: 20px;
+    color: #2ecc71;
+}
