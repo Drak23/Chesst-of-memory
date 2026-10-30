@@ -133,21 +133,21 @@ scene("menu", () => {
     crearBoton("NUEVA PARTIDA", 320, () => {
         go("mensaje", {
             titulo: "NUEVA PARTIDA",
-            descripcion: "Aquí comenzará tu aventura.",
+            descripcion: "Aventura perrona en pregreso.",
         });
     });
 
     crearBoton("OPCIONES", 390, () => {
         go("mensaje", {
             titulo: "OPCIONES",
-            descripcion: "Aquí podrás configurar el juego.",
+            descripcion: "Aquí podrás configurar el mega increible juego.",
         });
     });
 
     crearBoton("SALIR", 460, () => {
         go("mensaje", {
             titulo: "HASTA PRONTO",
-            descripcion: "Puedes cerrar esta pestaña.",
+            descripcion: "Puedes cerrar esta pestaña y no vuelvas 👍(＾＾).",
         });
     });
 
