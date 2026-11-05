@@ -1,15 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess of Memory</title>
-    <link rel="stylesheet" href="./style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chesst of Memory - La Torre</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Carga directa de la versión estable de KAPLAY -->
+  <script src="https://unpkg.com/kaplay@3001.0.19/dist/kaplay.js"></script>
 </head>
 <body>
-    <main id="game-container"></main>
 
-    
-    <script type="module" src="./js/main.js"></script>
+  <div class="game-wrapper">
+    <div class="game-header">
+      <span class="game-title">Chesst of Memory: La Torre</span>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="game-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Tu juego -->
+  <script src="game.js"></script>
 </body>
 </html>
