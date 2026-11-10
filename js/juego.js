@@ -1,6 +1,6 @@
 import { colores } from "./colores.js";
 import { crearInventario, agregarObjeto, tieneObjeto, yaRecogido, OBJETOS } from "./inventario.js";
-import { progreso } from "./Minijuego.js";
+import { progreso } from "./minijuego.js";
  
 // Todas las medidas de SALAS están en el tamaño de tus imágenes: 640 x 360.
 // S es cuánto se agranda en pantalla (2 = ventana de 1280 x 720).
@@ -10,10 +10,9 @@ const H = 360 * S;
  
 const SALAS = {
     vestibulo: {
-        imagen: "assets/entrada.png",
-        // Piso caminable: polígono con los puntos [x, y].
-        // Sigue la base de las paredes (diagonales) y sube por los escalones
-        // hasta el descanso de arriba, frente a la puerta.
+        imagen: "assets/Esenarios/entrada.png",
+        // Piso caminable: polígono con los puntos [x, y] donde pueden pisar los pies.
+        // Sigue la base de las paredes (diagonales) y sube por los escalones hasta el descanso de arriba, frente a la puerta.
         suelo: [
             [20, 297],
             [200, 274],
@@ -36,6 +35,7 @@ const SALAS = {
                 zona: [40, 236, 104, 330],
                 color: "#2f6fd0",
                 destino: { sala: "pasillo", spawn: [264, 250] },
+                animacion: { imagen: "assets/Puertas/animationdoor-Sheet.png", cuadros: 3, pos: [29, 81], fps: 8 },
             },
             {
                 nombre: "Puerta naranja",
@@ -43,6 +43,7 @@ const SALAS = {
                 zona: [528, 236, 604, 330],
                 color: "#e07a1f",
                 destino: null,
+                animacion: { imagen: "assets/Puertas/animationdoor2-Sheet.png", cuadros: 4, pos: [521, 86], fps: 8 },
                 mensaje: "Está atascada... todavía no hay nada detrás.",
                 cerrada: true,
             },
@@ -52,6 +53,7 @@ const SALAS = {
                 zona: [288, 150, 352, 190],
                 color: "#4a4a3a",
                 destino: null,
+                animacion: { imagen: "assets/Puertas/Puertareja.png", cuadros: 4, pos: [270, 68], fps: 8 },
                 mensaje: "Está atascada... todavía no hay nada detrás.",
                 cerrada: true,
             },
@@ -59,9 +61,8 @@ const SALAS = {
     },
  
     pasillo: {
-        imagen: "assets/pasillo.png",
-        // Piso del pasillo: el fondo toca la base de las puertas del centro (y = 240)
-        // y las orillas siguen la base de las paredes, que se abren hacia el frente.
+        imagen: "assets/Esenarios/pasillo.png",
+        // Piso del pasillo: el fondo toca la base de las puertas del centro (y = 240) y las orillas siguen la base de las paredes, que se abren hacia el frente.
         suelo: [
             [20, 303],    // esquina izquierda (junto a la puerta izquierda)
             [194, 240],   // fondo, esquina izquierda
@@ -71,21 +72,16 @@ const SALAS = {
             [20, 352],
         ],
         escala: [[240, 0.62], [352, 1.25]],
-        // Objetos en el piso: [x, y] donde quedan (dentro del piso caminable)
-        objetos: [
-            { id: "nota_1", pos: [130, 312] },
-            { id: "llave", pos: [320, 292] },
-            { id: "nota_2", pos: [500, 304] },
-        ],
+        // Objetos en el piso: [x, y] donde quedan (dentro del piso caminable).
+        objetos: [],
         puertas: [
             {
                 nombre: "Puerta izquierda",
                 rect: [44, 80, 60, 216],
                 zona: [44, 246, 104, 326],
                 color: "#2f6fd0",
-                destino: null,
-                mensaje: "Está cerrada con llave(puzzle)",
-                cerrada: true,
+                destino: { sala: "habitacion1", spawn: [560, 318] },
+                animacion: { imagen: "assets/Puertas/animationdoor1-Sheet.png", cuadros: 3, pos: [32, 80], fps: 8 },
             },
             {
                 nombre: "Puerta azul",
@@ -93,7 +89,7 @@ const SALAS = {
                 zona: [224, 200, 296, 244],
                 color: "#2f6fd0",
                 destino: { sala: "vestibulo", spawn: [124, 300] },
-                mensaje: "Está cerrada con llave(puzzle)",
+                animacion: { imagen: "assets/Puertas/Pasilloanimation-Sheet.png", cuadros: 3, pos: [212, 123], fps: 8 },
             },
             {
                 nombre: "Puerta de madera",
@@ -103,22 +99,73 @@ const SALAS = {
                 destino: null,
                 mensaje: "Está cerrada con llave.",
                 requiere: "llave",        // objeto necesario para intentar abrirla
-                minijuego: "madera",      // con la llave se entra al minijuego
-                mensajeAbierta: "Aquí irá el interior (todavía no existe).",
+                animacion: { imagen: "assets/Puertas/Torreanimation-Sheet.png", cuadros: 3, pos: [331, 124], fps: 8 },
+                minijuegos: [
+                    { escena: "minijuego", id: "madera" },  // el círculo (con la llave)
+                    { escena: "torre", id: "torre" },       // La Torre (después de abrirla)
+                ],
+                mensajeAbierta: "Ya derrotaste a La Torre. (Aquí irá lo que sigue.)",
             },
             {
                 nombre: "Puerta derecha",
                 rect: [536, 90, 64, 184],
                 zona: [536, 220, 604, 304],
                 color: "#2f6fd0",
-                destino: null,
-                mensaje: "No habre esta cerrada",
-                cerrada: true,
+                destino: { sala: "habitacion", spawn: [80, 318] },
+                animacion: { imagen: "assets/Puertas/animation door2-Sheet.png", cuadros: 3, pos: [522, 81], fps: 8 },
+            },
+        ],
+    },
+ 
+    habitacion1: {
+        imagen: "assets/Esenarios/habitacion1.png",
+        // Piso: sigue la base de las paredes y se detiene antes de la mesa del fondo
+        suelo: [[10, 314], [192, 250], [458, 250], [630, 316], [630, 352], [10, 352]],
+        escala: [[250, 0.62], [352, 1.25]],
+        // Objetos en el piso: [x, y] donde quedan (dentro del piso caminable)
+        objetos: [
+            { id: "nota_1", pos: [190, 300] },
+        ],
+        puertas: [
+            {
+                nombre: "Puerta de salida",
+                rect: [530, 85, 78, 215],
+                zona: [500, 292, 626, 350],
+                color: "#6b4a2e",
+                destino: { sala: "pasillo", spawn: [76, 310] },
+                animacion: { imagen: "assets/Puertas/door-Sheet.png", cuadros: 3, pos: [527, 83], fps: 8, espejo: true },
+            },
+        ],
+    },
+    habitacion: {
+        imagen: "assets/Esenarios/habitacion.png",
+        espejo: true,
+        suelo: [[630, 314], [448, 250], [182, 250], [10, 316], [10, 352], [630, 352]],
+        escala: [[250, 0.62], [352, 1.25]],
+        objetos: [
+            { id: "nota_2", pos: [450, 300] },
+        ],
+        puertas: [
+            {
+                nombre: "Puerta de salida",
+                rect: [32, 85, 78, 215],
+                zona: [14, 292, 140, 350],
+                color: "#6b4a2e",
+                destino: { sala: "pasillo", spawn: [570, 290] },
+                animacion: { imagen: "assets/Puertas/door-Sheet.png", cuadros: 3, pos: [29, 83], fps: 8  },
+            },
+            {
+                nombre: "Cofre",
+                tipo: "cofre",
+                rect: [319, 185, 24, 12],
+                zona: [240, 252, 370, 290],
+                puzzle: "figuras",
+                recompensa: "llave",
             },
         ],
     },
 };
-
+ 
 function puntoEnPoligono(poli, x, y) {
     let dentro = false;
     for (let i = 0, j = poli.length - 1; i < poli.length; j = i++) {
@@ -142,7 +189,7 @@ function escalaEn(puntos, y) {
     return puntos[puntos.length - 1][1];
 }
  
-// Cuánto se agranda el sprite (32 px por cuadro). Se sube o se baja para cambiar el tamaño.
+// Cuánto se agranda el sprite (32 px por cuadro). Súbelo o bájalo para cambiar el tamaño.
 const ESCALA_SPRITE = 6;
  
 const SALA_INICIAL = "vestibulo";
@@ -158,15 +205,34 @@ export function cargarJuego(k) {
     // Carga de los escenarios (guárdados en la carpeta assets/)
     for (const id in SALAS) k.loadSprite(id, SALAS[id].imagen);
  
-    // Protagonista: hoja de 4 cuadros (128 x 32 px, cada cuadro de 32 x 32)
-    k.loadSprite("protagonista", "assets/sprites/prota.png", {
-        sliceX: 4,
-        filter: "nearest", // pixel art nítido, sin suavizar
-        anims: {
-            quieto: 0,
-            caminar: { from: 0, to: 3, loop: true, speed: 8 },
-        },
-    });
+    // Protagonista: una hoja por vista (cada cuadro de 32 x 32 px)
+    const VISTAS = {
+        lado:   { archivo: "assets/sprites/prota.png",   cuadros: 4 },
+        arriba: { archivo: "assets/sprites/playerbackwards-Sheet.png", cuadros: 5 },
+        abajo:  { archivo: "assets/sprites/playerfrontview-Sheet.png",  cuadros: 5 },
+    };
+    for (const [nombre, v] of Object.entries(VISTAS)) {
+        k.loadSprite(`prota_${nombre}`, v.archivo, {
+            sliceX: v.cuadros,
+            filter: "nearest", // pixel art nítido, sin suavizar
+            anims: {
+                quieto: 0,
+                caminar: { from: 0, to: v.cuadros - 1, loop: true, speed: 8 },
+            },
+        });
+    }
+ 
+    // Animaciones de las puertas
+    for (const [idSala, datosSala] of Object.entries(SALAS)) {
+        datosSala.puertas.forEach((p, i) => {
+            if (!p.animacion) return;
+            p.animacion.nombre = `puerta_${idSala}_${i}`;
+            k.loadSprite(p.animacion.nombre, p.animacion.imagen, {
+                sliceX: p.animacion.cuadros,
+                filter: "nearest",
+            });
+        });
+    }
  
     scene("juego", (datos = {}) => {
         const salaId = datos.sala || SALA_INICIAL;
@@ -180,9 +246,9 @@ export function cargarJuego(k) {
         const inv = crearInventario(k, { puedeAbrir: () => !ocupado });
  
         //  Fondo
-        add([sprite(salaId, { width: W, height: H }), pos(0, 0), z(-10)]);
+        add([sprite(salaId, { width: W, height: H, flipX: !!sala.espejo }), pos(0, 0), z(-10)]);
  
-        //  Sombra (va aparte para que no se estire con el sprite)
+        //  Sombra
         const sombra = add([
             circle(34),
             scale(1, 0.3),
@@ -193,14 +259,19 @@ export function cargarJuego(k) {
             z(10),
         ]);
  
-        //  Personaje: sprite del protagonista (pos = donde pisan sus pies)
         const jugador = add([
-            sprite("protagonista", { anim: "quieto" }),
             pos(spawn[0] * S, spawn[1] * S),
-            anchor("bot"),
             scale(ESCALA_SPRITE),
             z(10),
         ]);
+        const vistas = {};
+        for (const nombre of Object.keys(VISTAS)) {
+            vistas[nombre] = jugador.add([
+                sprite(`prota_${nombre}`, { anim: "quieto" }),
+                anchor("bot"),
+            ]);
+            vistas[nombre].hidden = nombre !== "abajo";
+        }
  
         // Perspectiva: más lejos = más pequeño
         const poligono = sala.suelo;
@@ -336,6 +407,9 @@ export function cargarJuego(k) {
         ]);
         tween(1, 0, 0.4, (v) => (velo.opacity = v));
  
+        // Mensaje al volver de un puzzle o minijuego
+        if (datos.mensaje) wait(0.6, () => decir(datos.mensaje));
+ 
         function irA(destino) {
             ocupado = true;
             tween(0, 1, 0.35, (v) => (velo.opacity = v));
@@ -356,7 +430,27 @@ export function cargarJuego(k) {
             return sala.puertas.find((p) => dentro(p.zona, px, py));
         }
  
+        // Cofre: si el puzzle no está resuelto, entra al puzzle; si ya lo está, queda vacío
+        function abrirCofre(c) {
+            if (progreso[c.puzzle]) {
+                decir("El cofre está vacío.");
+                return;
+            }
+            irA({
+                escena: "puzzle",
+                datos: {
+                    id: c.puzzle,
+                    recompensa: c.recompensa,
+                    volver: { sala: salaId, spawn: [jugador.pos.x / S, jugador.pos.y / S] },
+                },
+            });
+        }
+ 
         function abrir(puerta) {
+            if (puerta.tipo === "cofre") {
+                abrirCofre(puerta);
+                return;
+            }
             if (puerta.tipo === "escalera") {
                 irA(puerta.destino);
                 return;
@@ -364,24 +458,58 @@ export function cargarJuego(k) {
  
             ocupado = true;
             const [rx, ry, rw, rh] = puerta.rect.map((n) => n * S);
+            const anim = puerta.animacion;
+            let hueco = null;
+            let hoja;
+            if (anim) {
+                hoja = add([
+                    sprite(anim.nombre, { frame: 0, flipX: !!anim.espejo }),
+                    pos(anim.pos[0] * S, anim.pos[1] * S),
+                    scale(S * (anim.escala || 1)),
+                    z(6),
+                ]);
+            } else {
+                // Interior oscuro que se ve al abrir
+                hueco = add([
+                    rect(rw, rh),
+                    pos(rx, ry),
+                    color("#17131f"),
+                    z(5),
+                ]);
+                // Sprite de la puerta que se "abre" (se encoge hacia la bisagra)
+                hoja = add([
+                    rect(rw, rh),
+                    pos(rx, ry),
+                    color(puerta.color || "#6b7a90"),
+                    outline(3, "#0d0b12"),
+                    z(6),
+                ]);
+            }
+            const xBase = hoja.pos.x;
+            const quitar = () => {
+                destroy(hoja);
+                if (hueco) destroy(hueco);
+            };
  
-            // Interior oscuro que se ve al abrir
-            const hueco = add([
-                rect(rw, rh),
-                pos(rx, ry),
-                color("#17131f"),
-                z(5),
-            ]);
-            // Hoja de la puerta que se "abre" (se encoge hacia la bisagra)(despues se cambia por la animacion)
-            const hoja = add([
-                rect(rw, rh),
-                pos(rx, ry),
-                color(puerta.color || "#6b7a90"),
-                outline(3, "#0d0b12"),
-                z(6),
-            ]);
+            // Abre
+            function reproducir(alReves, fin) {
+                if (!anim) {
+                    if (alReves) tween(0.2, 1, 0.3, (v) => (hoja.width = rw * v));
+                    else tween(1, 0.2, 0.35, (v) => (hoja.width = rw * v), easings.easeOutQuad);
+                    wait(alReves ? 0.35 : 0.45, fin);
+                    return;
+                }
+                const fps = anim.fps || 8;
+                for (let i = 1; i < anim.cuadros; i++) {
+                    const f = alReves ? anim.cuadros - 1 - i : i;
+                    wait(i / fps, () => {
+                        if (hoja.exists()) hoja.frame = f;
+                    });
+                }
+                wait(anim.cuadros / fps, fin);
+            }
  
-            // Bloqueada: marcada como cerrada, o le falta el objeto que requiere
+            // Bloqueada: marcada como cerrada
             const bloqueada = puerta.cerrada || (puerta.requiere && !tieneObjeto(puerta.requiere));
  
             if (bloqueada) {
@@ -389,40 +517,37 @@ export function cargarJuego(k) {
                 let t = 0;
                 const sacudir = k.onUpdate(() => {
                     t += dt();
-                    hoja.pos.x = rx + Math.sin(t * 60) * 3;
+                    hoja.pos.x = xBase + Math.sin(t * 60) * 3;
                 });
                 decir(puerta.mensaje);
                 wait(0.5, () => {
                     sacudir.cancel();
-                    destroy(hoja);
-                    destroy(hueco);
+                    quitar();
                     ocupado = false;
                 });
                 return;
             }
  
-            tween(1, 0.2, 0.35, (v) => (hoja.width = rw * v), easings.easeOutQuad);
- 
-            wait(0.45, () => {
-                if (puerta.minijuego && !progreso[puerta.minijuego]) {
-                    // Entra al minijuego y vuelve a este mismo lugar al terminar
+            reproducir(false, () => {
+                const lista = puerta.minijuegos || [];
+                const pendiente = lista.find((m) => !progreso[m.id]);
+                if (pendiente) {
+                    // Entra al minijuego que toca y vuelve a este mismo lugar al terminar
                     irA({
-                        escena: "minijuego",
+                        escena: pendiente.escena,
                         datos: {
-                            id: puerta.minijuego,
+                            id: pendiente.id,
                             volver: { sala: salaId, spawn: [jugador.pos.x / S, jugador.pos.y / S] },
                         },
                     });
                 } else if (puerta.destino) {
                     irA(puerta.destino);
                 } else {
-                    const resuelto = puerta.minijuego && progreso[puerta.minijuego];
+                    const resuelto = lista.length > 0;
                     decir((resuelto && puerta.mensajeAbierta) || puerta.mensaje || "No hay nada aquí.");
                     wait(1.3, () => {
-                        tween(0.2, 1, 0.3, (v) => (hoja.width = rw * v));
-                        wait(0.35, () => {
-                            destroy(hoja);
-                            destroy(hueco);
+                        reproducir(true, () => {
+                            quitar();
                             ocupado = false;
                         });
                     });
@@ -449,7 +574,7 @@ export function cargarJuego(k) {
             else go("menu");
         });
  
-        // PRUEBA: F3 te da el siguiente objeto del catálogo
+        // PRUEBA: F3 te da el siguiente objeto del catálogo (bórralo cuando ya no lo necesites)
         onKeyPress("f3", () => {
             const nuevo = Object.keys(OBJETOS).find((id) => agregarObjeto(id));
             decir(nuevo ? `Obtuviste: ${OBJETOS[nuevo].nombre}` : "Ya tienes todos los objetos");
@@ -458,6 +583,15 @@ export function cargarJuego(k) {
         //  Movimiento
         const VELOCIDAD = 200;
         let mirando = 1;
+        let direccion = "abajo"; // hacia dónde mira: "lado", "arriba" o "abajo"
+ 
+        // nombre: "quieto" o "caminar", siempre en la vista de la dirección actual
+        function animar(nombre) {
+            for (const d in vistas) vistas[d].hidden = d !== direccion;
+            const v = vistas[direccion];
+            if (v.curAnim() !== nombre) v.play(nombre);
+            v.flipX = direccion === "lado" && mirando < 0;
+        }
  
         onUpdate(() => {
             if (!ocupado && !inv.estaAbierto()) {
@@ -486,15 +620,15 @@ export function cargarJuego(k) {
                     }
                     if (dx !== 0) mirando = dx;
  
-                    // Animación de caminar
-                    if (jugador.curAnim() !== "caminar") jugador.play("caminar");
-                } else if (jugador.curAnim() !== "quieto") {
-                    jugador.play("quieto");
+                    // Si se mueve de lado (aun en diagonal) se ve de lado;
+                    // si solo va hacia arriba o hacia abajo, de espaldas o de frente.
+                    direccion = dx !== 0 ? "lado" : dy < 0 ? "arriba" : "abajo";
+                    animar("caminar");
+                } else {
+                    animar("quieto");
                 }
-                // Espeja el sprite según hacia dónde camina
-                jugador.flipX = mirando < 0;
-            } else if (jugador.curAnim() !== "quieto") {
-                jugador.play("quieto");
+            } else {
+                animar("quieto");
             }
  
             ajustarPerspectiva();
@@ -524,6 +658,16 @@ export function cargarJuego(k) {
                 outline: { color: k.rgb(0, 255, 0), width: 3 },
             });
             for (const p of sala.puertas) {
+                if (p.animacion) {
+                    k.drawSprite({
+                        sprite: p.animacion.nombre,
+                        frame: 0,
+                        flipX: !!p.animacion.espejo,
+                        pos: vec2(p.animacion.pos[0] * S, p.animacion.pos[1] * S),
+                        scale: vec2(S * (p.animacion.escala || 1)),
+                        opacity: 0.55,
+                    });
+                }
                 drawRect({
                     pos: vec2(p.rect[0] * S, p.rect[1] * S),
                     width: p.rect[2] * S,

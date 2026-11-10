@@ -3,13 +3,18 @@ import { colores } from "./colores.js";
 export const OBJETOS = {
     nota_1: {
         nombre: "Nota 1",
-        descripcion: "Un papel doblado con algo escrito. (Escribe aquí el texto de la nota 1)",
+        descripcion: "Circulo (1)",
         color: "#e8892b",
     },
     nota_2: {
         nombre: "Nota 2",
-        descripcion: "Otro papel, más arrugado. (Escribe aquí el texto de la nota 2)",
+        descripcion: "Rectángulo (4)",
         color: "#e8892b",
+    },
+    llave_hierro: {
+        nombre: "Llave de hierro",
+        descripcion: "Una llave pesada, de hierro oscuro. La Torre la custodiaba.",
+        color: "#9aa3ad",
     },
     llave: {
         nombre: "Llave",
@@ -18,6 +23,7 @@ export const OBJETOS = {
     },
 };
  
+
 const MAX_OBJETOS = 12;
 const objetos = []; // ids de los objetos que lleva el jugador
 const recogidos = new Set(); // objetos que ya se recogieron alguna vez (no vuelven a salir en el piso)
@@ -25,7 +31,7 @@ const recogidos = new Set(); // objetos que ya se recogieron alguna vez (no vuel
 export function agregarObjeto(id) {
     if (!OBJETOS[id]) return false;           // no existe en el catálogo
     if (objetos.includes(id)) return false;   // ya lo tiene
-    if (objetos.length >= MAX_OBJETOS) return false; // inventario lleno
+    if (objetos.length >= MAX_OBJETOS) return false; // inventario lleno (momentaneo)
     objetos.push(id);
     recogidos.add(id);
     return true;
@@ -49,6 +55,7 @@ export function tieneObjeto(id) {
 export function listaObjetos() {
     return [...objetos];
 }
+ 
 
 export function crearInventario(k, opciones = {}) {
     const {
@@ -56,7 +63,7 @@ export function crearInventario(k, opciones = {}) {
         z, area, destroy, onKeyPress, onUpdate, clamp,
     } = k;
  
-    // Para impedir que se abra en momentos donde no se debe (ejemplo: mientras se abre una puerta)
+    // Para impedir que se abra en momentos que no son (por ejemplo, mientras se abre una puerta)
     const puedeAbrir = opciones.puedeAbrir || (() => true);
  
     const COLS = 4;
@@ -139,7 +146,7 @@ export function crearInventario(k, opciones = {}) {
             if (!id) continue;
             const obj = OBJETOS[id];
  
-            // Ícono: un cuadro de color con la inicial (se cambiara por un sprite cuando se aga)
+            // Ícono: un cuadro de color con la inicial (se cambiara cuando se tenga el sprite)
             if (obj.icono) {
                 capa.add([
                     sprite(obj.icono, { width: 64, height: 64 }),

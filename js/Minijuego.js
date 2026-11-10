@@ -3,6 +3,8 @@ import { colores } from "./colores.js";
 // Qué minijuegos ya están resueltos (se conserva al cambiar de sala)
 export const progreso = {
     madera: false,
+    figuras: false, // puzzle de figuras del cofre
+    torre: false,   // pelea contra La Torre (detrás de la puerta de madera)
 };
 
 export function cargarMinijuego(k) {
