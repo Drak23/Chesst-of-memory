@@ -3,7 +3,7 @@ import { cargarMenu } from "./Menu.js";
 import { cargarJuego } from "./juego.js";
 import { cargarMinijuego } from "./minijuego.js";
 import { cargarPuzzle } from "./Puzzle figuras.js";
-import { cargarTorre } from "./torre.js";
+import { cargarTorre } from "./Torre.js";
 import { colores } from "./colores.js";
  
 // Única instancia de Kaplay, compartida por todas las escenas.
