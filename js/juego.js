@@ -14,44 +14,41 @@ const SALAS = {
         // Piso caminable: polígono con los puntos [x, y] donde pueden pisar los pies.
         // Sigue la base de las paredes (diagonales) y sube por los escalones hasta el descanso de arriba, frente a la puerta.
         suelo: [
-            [20, 297],
-            [200, 274],
-            [245, 282],
+            [20, 310],    // esquina izquierda (junto a la puerta izquierda)
+            [120, 274],   // esquina inferior izquierda de las escaleras
+            [245, 282],   // esquina inferior derecha de las escaleras
             [292, 158],   // esquina superior izquierda de las escaleras
             [348, 158],   // esquina superior derecha de las escaleras
-            [395, 282],
-            [440, 274],
-            [620, 297],
-            [620, 352],
-            [20, 352],
+            [395, 282],    // esquina inferior izquierda de las escaleras
+            [500, 274],   // esquina inferior derecha de las escaleras
+            [630, 320],    // esquina derecha (junto a la puerta derecha)
+            [635, 352],  // esquina inferior derecha
+            [20, 352],   // esquina inferior izquierda
         ],
         // Tamaño del personaje según su altura en pantalla: [y, escala].
         // Arriba de las escaleras se ve más pequeño porque está más lejos.
         escala: [[158, 0.38], [284, 0.73], [352, 1.25]],
         puertas: [
             {
-                nombre: "Puerta azul",
+                nombre: "Puerta Torre",
                 rect: [40, 88, 64, 188],
-                zona: [40, 236, 104, 330],
-                color: "#2f6fd0",
+                zona: [40, 236, 104, 300],
                 destino: { sala: "pasillo", spawn: [264, 250] },
                 animacion: { imagen: "assets/Puertas/animationdoor-Sheet.png", cuadros: 3, pos: [29, 81], fps: 8 },
             },
             {
-                nombre: "Puerta naranja",
+                nombre: "Puerta alfil",
                 rect: [528, 92, 76, 180],
-                zona: [528, 236, 604, 330],
-                color: "#e07a1f",
+                zona: [528, 236, 590, 300],
                 destino: null,
                 animacion: { imagen: "assets/Puertas/animationdoor2-Sheet.png", cuadros: 4, pos: [521, 86], fps: 8 },
                 mensaje: "Está atascada... todavía no hay nada detrás.",
                 cerrada: true,
             },
             {
-                nombre: "Puerta de arriba",
+                nombre: "Puerta de las escaleras",
                 rect: [286, 88, 72, 64],
-                zona: [288, 150, 352, 190],
-                color: "#4a4a3a",
+                zona: [286, 130, 352, 160],
                 destino: null,
                 animacion: { imagen: "assets/Puertas/Puertareja.png", cuadros: 4, pos: [270, 68], fps: 8 },
                 mensaje: "Está atascada... todavía no hay nada detrás.",
@@ -64,10 +61,10 @@ const SALAS = {
         imagen: "assets/Esenarios/pasillo.png",
         // Piso del pasillo: el fondo toca la base de las puertas del centro (y = 240) y las orillas siguen la base de las paredes, que se abren hacia el frente.
         suelo: [
-            [20, 303],    // esquina izquierda (junto a la puerta izquierda)
+            [20, 305],    // esquina izquierda (junto a la puerta izquierda)
             [194, 240],   // fondo, esquina izquierda
             [450, 240],   // fondo, esquina derecha
-            [620, 279],   // esquina derecha (junto a la puerta derecha)
+            [620, 310],   // esquina derecha (junto a la puerta derecha)
             [620, 352],
             [20, 352],
         ],
@@ -78,24 +75,21 @@ const SALAS = {
             {
                 nombre: "Puerta izquierda",
                 rect: [44, 80, 60, 216],
-                zona: [44, 246, 104, 326],
-                color: "#2f6fd0",
+                zona: [44, 246, 104, 300],
                 destino: { sala: "habitacion1", spawn: [560, 318] },
                 animacion: { imagen: "assets/Puertas/animationdoor1-Sheet.png", cuadros: 3, pos: [32, 80], fps: 8 },
             },
             {
-                nombre: "Puerta azul",
+                nombre: "Puerta entrada",
                 rect: [224, 124, 72, 116],
                 zona: [224, 200, 296, 244],
-                color: "#2f6fd0",
                 destino: { sala: "vestibulo", spawn: [124, 300] },
                 animacion: { imagen: "assets/Puertas/Pasilloanimation-Sheet.png", cuadros: 3, pos: [212, 123], fps: 8 },
             },
             {
-                nombre: "Puerta de madera",
+                nombre: "Puerta de La Torre",
                 rect: [348, 124, 72, 116],
                 zona: [348, 200, 420, 244],
-                color: "#6b7a90",
                 destino: null,
                 mensaje: "Está cerrada con llave.",
                 requiere: "llave",        // objeto necesario para intentar abrirla
@@ -109,8 +103,7 @@ const SALAS = {
             {
                 nombre: "Puerta derecha",
                 rect: [536, 90, 64, 184],
-                zona: [536, 220, 604, 304],
-                color: "#2f6fd0",
+                zona: [536, 220, 604, 290],
                 destino: { sala: "habitacion", spawn: [80, 318] },
                 animacion: { imagen: "assets/Puertas/animation door2-Sheet.png", cuadros: 3, pos: [522, 81], fps: 8 },
             },
@@ -130,8 +123,7 @@ const SALAS = {
             {
                 nombre: "Puerta de salida",
                 rect: [530, 85, 78, 215],
-                zona: [500, 292, 626, 350],
-                color: "#6b4a2e",
+                zona: [530, 262, 600, 300],
                 destino: { sala: "pasillo", spawn: [76, 310] },
                 animacion: { imagen: "assets/Puertas/door-Sheet.png", cuadros: 3, pos: [527, 83], fps: 8, espejo: true },
             },
@@ -148,9 +140,8 @@ const SALAS = {
         puertas: [
             {
                 nombre: "Puerta de salida",
-                rect: [32, 85, 78, 215],
-                zona: [14, 292, 140, 350],
-                color: "#6b4a2e",
+                rect: [42, 85, 78, 215],
+                zona: [42, 262, 110, 300],
                 destino: { sala: "pasillo", spawn: [570, 290] },
                 animacion: { imagen: "assets/Puertas/door-Sheet.png", cuadros: 3, pos: [29, 83], fps: 8  },
             },
@@ -158,7 +149,7 @@ const SALAS = {
                 nombre: "Cofre",
                 tipo: "cofre",
                 rect: [319, 185, 24, 12],
-                zona: [240, 252, 370, 290],
+                zona: [300, 202, 360, 260],
                 puzzle: "figuras",
                 recompensa: "llave",
             },
@@ -207,8 +198,8 @@ export function cargarJuego(k) {
  
     // Protagonista: una hoja por vista (cada cuadro de 32 x 32 px)
     const VISTAS = {
-        lado:   { archivo: "assets/sprites/prota.png",   cuadros: 4 },
-        arriba: { archivo: "assets/sprites/playerbackwards-Sheet.png", cuadros: 5 },
+        lado:   { archivo: "assets/sprites/Playerfront-Sheet.png",   cuadros: 5 },
+        arriba: { archivo: "assets/sprites/backwards-Sheet.png", cuadros: 5 },
         abajo:  { archivo: "assets/sprites/playerfrontview-Sheet.png",  cuadros: 5 },
     };
     for (const [nombre, v] of Object.entries(VISTAS)) {
@@ -386,8 +377,8 @@ export function cargarJuego(k) {
                 size: 14,
                 font: "monospace",
             }),
-            pos(12, 10),
-            color(colores.gris),
+            pos(12, 20),
+            color(colores.rojo),
             z(201),
         ]);
  
