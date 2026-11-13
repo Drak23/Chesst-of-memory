@@ -1,0 +1,59 @@
+/* Panel del minijuego */
+#puzzleMemoria {
+    width: 300px;
+    margin: 60px auto;
+    padding: 20px;
+    background-color: #29211e;
+    border: 3px solid #75583b;
+    color: #d9c5a5;
+    font-family: Georgia;
+    text-align: center;
+}
+/* Texto de las rondas */
+#rondaMemoria {
+    font-size: 18px;
+}
+/* Panel de luces */
+#panelMemoria {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+}
+/* Botones */
+.luzMemoria {
+    height: 100px;
+    border: 3px solid #665039;
+    cursor: pointer;
+    opacity: 0.5;
+}
+/* Colores */
+.rojo {
+    background-color: #943b42;
+}
+.azul {
+    background-color: #395b80;
+}
+.verde {
+    background-color: #46734a;
+}
+.amarillo {
+    background-color: #b18c47;
+}
+/* Luz encendida */
+.luzMemoria.activa {
+    opacity: 1;
+    filter: brightness(1.8);
+}
+/* Mensajes */
+#mensajeMemoria {
+    font-size: 16px;
+}
+/* Botón comenzar */
+#comenzarMemoria {
+    padding: 10px 20px;
+    background-color: #49382d;
+    color: white;
+    border: 2px solid #75583b;
+    cursor: pointer;
+}
