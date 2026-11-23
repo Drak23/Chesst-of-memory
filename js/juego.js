@@ -61,10 +61,10 @@ const SALAS = {
                 nombre: "Puerta alfil",
                 rect: [528, 92, 76, 180],
                 zona: [528, 236, 590, 300],
-                destino: null,
+                destino: { escena: "fin_demo" },   // con la llave del alfil se abre y termina la demo
+                requiere: "llave_hierro",          // objeto necesario para abrirla
                 animacion: { imagen: "assets/Puertas/animationdoor2-Sheet.png", cuadros: 4, pos: [521, 86], fps: 8 },
                 mensaje: { quien: "Vlad", texto: "Cerrada... Bueno, probaré con la otra." },
-                cerrada: true,
             },
             {
                 nombre: "Puerta de las escaleras",
@@ -249,6 +249,36 @@ export function cargarJuego(k) {
         });
     }
  
+    // Pantalla final de la demo
+    scene("fin_demo", () => {
+        add([rect(W, H), pos(0, 0), color(0, 0, 0), z(0)]);
+        const titulo = add([
+            text("FIN DE LA DEMO", { size: 64, font: "monospace" }),
+            pos(W / 2, H / 2),
+            anchor("center"),
+            color(colores.blanco),
+            opacity(0),
+            z(1),
+        ]);
+        const ayuda = add([
+            text("ESPACIO: volver al menú", { size: 16, font: "monospace" }),
+            pos(W / 2, H - 50),
+            anchor("center"),
+            color(colores.gris),
+            opacity(0),
+            z(1),
+        ]);
+        let listo = false;
+        tween(0, 1, 1.5, (v) => (titulo.opacity = v));
+        wait(3, () => {
+            listo = true;
+            ayuda.opacity = 1;
+        });
+        onKeyPress(["space", "enter", "escape"], () => {
+            if (listo) go("menu");
+        });
+    });
+
     scene("juego", (datos = {}) => {
         const salaId = datos.sala || SALA_INICIAL;
         const sala = SALAS[salaId];
