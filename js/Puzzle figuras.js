@@ -10,7 +10,7 @@ const INICIAL = [2, 0, 3, 1];     // combinación con la que empieza
 export function cargarPuzzle(k) {
     const {
         add, rect, text, pos, anchor, color, outline, area, rgb, vec2, wait,
-        onKeyPress, onDraw, go, scene, width, height,
+        onKeyPress, onUpdate, onDraw, go, scene, width, height,
         drawCircle, drawRect, drawPolygon,
     } = k;
  
@@ -23,6 +23,7 @@ export function cargarPuzzle(k) {
         const cy = height() / 2;
         const posiciones = [...INICIAL];
         let terminado = false;
+        let sel = 0;   // casilla seleccionada (se ilumina)
  
         // Fondo
         add([rect(width(), height()), pos(0, 0), color(colores.fondo)]);
@@ -51,7 +52,7 @@ export function cargarPuzzle(k) {
             color(46, 204, 113),
         ]);
         add([
-            text("CLIC: cambiar figura     ESC: salir", { size: 16, font: "monospace" }),
+            text("←/→: elegir     ↑/↓ o ESPACIO: cambiar figura     ESC: salir", { size: 16, font: "monospace" }),
             pos(cx, height() - 50),
             anchor("center"),
             color(colores.gris),
@@ -79,6 +80,12 @@ export function cargarPuzzle(k) {
         }
  
         // Casillas (botones)
+        const casillas = [];
+        function cambiar(i, paso) {
+            if (terminado) return;
+            posiciones[i] = (posiciones[i] + paso + 4) % 4;
+            comprobar();
+        }
         for (let i = 0; i < 4; i++) {
             const casilla = add([
                 rect(CASILLA, CASILLA),
@@ -86,17 +93,26 @@ export function cargarPuzzle(k) {
                 anchor("center"),
                 color("#b5a17a"),
                 outline(2, "#786343"),
-                area(),
             ]);
-            casilla.onHover(() => { if (!terminado) casilla.color = rgb(210, 189, 145); });
-            casilla.onHoverEnd(() => { casilla.color = rgb(181, 161, 122); });
-            casilla.onClick(() => {
-                if (terminado) return;
-                posiciones[i] = (posiciones[i] + 1) % 4;
-                comprobar();
-            });
+            casillas.push(casilla);
         }
- 
+
+        // La casilla seleccionada se ilumina
+        onUpdate(() => {
+            casillas.forEach((c, i) => {
+                const elegida = i === sel && !terminado;
+                c.color = elegida ? rgb(240, 222, 170) : rgb(181, 161, 122);
+                c.outline.color = elegida ? rgb(214, 181, 104) : rgb(120, 99, 67);
+                c.outline.width = elegida ? 6 : 2;
+            });
+        });
+
+        // Flechas (o A / D) para elegir; arriba / abajo (o W / S, ESPACIO, ENTER, E) para cambiar la figura
+        onKeyPress(["left", "a"], () => { if (!terminado) sel = (sel + 3) % 4; });
+        onKeyPress(["right", "d"], () => { if (!terminado) sel = (sel + 1) % 4; });
+        onKeyPress(["up", "w", "space", "enter", "e"], () => cambiar(sel, 1));
+        onKeyPress(["down", "s"], () => cambiar(sel, -1));
+
         // Figuras dentro de las casillas
         onDraw(() => {
             for (let i = 0; i < 4; i++) {
