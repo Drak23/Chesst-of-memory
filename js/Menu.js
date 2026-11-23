@@ -103,7 +103,7 @@ export function cargarMenu(k) {
 
         // Aquí se conecta el menú con el juego
         crearBoton("NUEVA PARTIDA", 320, () => {
-            go("juego");
+            go("prologo");   // el prólogo termina entrando a "juego"
         });
 
         crearBoton("OPCIONES", 390, () => {
