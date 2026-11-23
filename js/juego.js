@@ -1,6 +1,8 @@
 import { colores } from "./colores.js";
-import { crearInventario, agregarObjeto, tieneObjeto, yaRecogido, OBJETOS } from "./inventario.js";
-import { progreso } from "./minijuego.js";
+import { crearInventario, agregarObjeto, tieneObjeto, yaRecogido, OBJETOS, cargarIconos, ajustar } from "./Inventario.js";
+import { progreso } from "./Minijuego.js";
+import { crearDialogo } from "./Dialogo.js";
+import { crearControles } from "./Controles.js";
  
 // Todas las medidas de SALAS están en el tamaño de tus imágenes: 640 x 360.
 // S es cuánto se agranda en pantalla (2 = ventana de 1280 x 720).
@@ -9,6 +11,25 @@ const W = 640 * S;
 const H = 360 * S;
  
 const SALAS = {
+    // Aquí despierta el protagonista (empieza el juego)
+    sotano: {
+        imagen: "assets/Esenarios/prision.png",
+        // Piso: sigue la base de las paredes (diagonales) hasta la pared del fondo
+        suelo: [[8, 316], [186, 244], [454, 244], [632, 320], [632, 352], [8, 352]],
+        escala: [[244, 0.55], [352, 1.25]],
+        objetos: [],
+        puertas: [
+            {
+                nombre: "Puerta de la celda",
+                rect: [500, 142, 70, 150],
+                zona: [470, 268, 615, 330],
+                directa: true,   // sin animación de puerta: se entra directo (cuando tengas el sprite, ponle "animacion" y quita esto)
+                minijuegos: [{ escena: "puzzle_memoria", id: "memoria" }],   // hay que resolver el puzzle de memoria para abrirla
+                destino: { sala: "vestibulo", spawn: [320, 320] },   // PROVISIONAL: a dónde lleva la reja
+            },
+        ],
+    },
+
     vestibulo: {
         imagen: "assets/Esenarios/entrada.png",
         // Piso caminable: polígono con los puntos [x, y] donde pueden pisar los pies.
@@ -42,7 +63,7 @@ const SALAS = {
                 zona: [528, 236, 590, 300],
                 destino: null,
                 animacion: { imagen: "assets/Puertas/animationdoor2-Sheet.png", cuadros: 4, pos: [521, 86], fps: 8 },
-                mensaje: "Está atascada... todavía no hay nada detrás.",
+                mensaje: { quien: "Vlad", texto: "Cerrada... Bueno, probaré con la otra." },
                 cerrada: true,
             },
             {
@@ -51,7 +72,7 @@ const SALAS = {
                 zona: [286, 130, 352, 160],
                 destino: null,
                 animacion: { imagen: "assets/Puertas/Puertareja.png", cuadros: 4, pos: [270, 68], fps: 8 },
-                mensaje: "Está atascada... todavía no hay nada detrás.",
+                mensaje: { quien: "Vlad", texto: "Parece que necesito tres llaves para abrir esto..." },
                 cerrada: true,
             },
         ],
@@ -96,7 +117,7 @@ const SALAS = {
                 animacion: { imagen: "assets/Puertas/Torreanimation-Sheet.png", cuadros: 3, pos: [331, 124], fps: 8 },
                 minijuegos: [
                     { escena: "minijuego", id: "madera" },  // el círculo (con la llave)
-                    { escena: "torre", id: "torre" },       // La Torre (después de abrirla)
+                    { escena: "torre", id: "torre", intro: "torre_intro" },  // La Torre (después de abrirla), con su diálogo antes
                 ],
                 mensajeAbierta: "Ya derrotaste a La Torre. (Aquí irá lo que sigue.)",
             },
@@ -183,8 +204,8 @@ function escalaEn(puntos, y) {
 // Cuánto se agranda el sprite (32 px por cuadro). Súbelo o bájalo para cambiar el tamaño.
 const ESCALA_SPRITE = 6;
  
-const SALA_INICIAL = "vestibulo";
-const SPAWN_INICIAL = [320, 320];
+const SALA_INICIAL = "sotano";
+const SPAWN_INICIAL = [300, 312];
  
 export function cargarJuego(k) {
     const {
@@ -196,6 +217,9 @@ export function cargarJuego(k) {
     // Carga de los escenarios (guárdados en la carpeta assets/)
     for (const id in SALAS) k.loadSprite(id, SALAS[id].imagen);
  
+    // Dibujos de los objetos (notas y llaves)
+    cargarIconos(k);
+
     // Protagonista: una hoja por vista (cada cuadro de 32 x 32 px)
     const VISTAS = {
         lado:   { archivo: "assets/sprites/Playerfront-Sheet.png",   cuadros: 5 },
@@ -235,6 +259,17 @@ export function cargarJuego(k) {
  
         // Inventario (TAB o I). No se abre mientras una puerta está animándose.
         const inv = crearInventario(k, { puedeAbrir: () => !ocupado });
+
+        // Cuadro de diálogo (los textos de las puertas salen aquí). Mientras está abierto no se puede mover.
+        const dialogo = crearDialogo(k);
+        const controles = crearControles(k);   // pantalla con los controles (sale al despertar en el sótano)
+        function hablar(lineas, fin) {
+            ocupado = true;
+            dialogo.hablar(lineas, () => {
+                ocupado = false;
+                if (fin) fin();
+            });
+        }
  
         //  Fondo
         add([sprite(salaId, { width: W, height: H, flipX: !!sala.espejo }), pos(0, 0), z(-10)]);
@@ -301,15 +336,29 @@ export function cargarJuego(k) {
                 opacity(0.3),
                 z(zObj - 0.1),
             ]);
-            const cuadro = add([
-                rect(lado, lado, { radius: 3 }),
-                pos(px, py - lado),
-                anchor("center"),
-                color(def.color),
-                outline(3, "#0d0b12"),
-                z(zObj),
-            ]);
-            const base = py - lado;
+            let cuadro;
+            let alza = lado;   // a qué altura del piso flota el centro del objeto
+            if (def.icono) {
+                // Con dibujo: se ve el sprite del objeto
+                const [sw, sh] = ajustar(def, (def.piso || 30) * e * 1.4);
+                alza = sh / 2 + 8;
+                cuadro = add([
+                    sprite(def.icono, { width: sw, height: sh }),
+                    pos(px, py - alza),
+                    anchor("center"),
+                    z(zObj),
+                ]);
+            } else {
+                cuadro = add([
+                    rect(lado, lado, { radius: 3 }),
+                    pos(px, py - lado),
+                    anchor("center"),
+                    color(def.color),
+                    outline(3, "#0d0b12"),
+                    z(zObj),
+                ]);
+            }
+            const base = py - alza;
             const fase = recogibles.length * 1.7;
             cuadro.onUpdate(() => {
                 cuadro.pos.y = base + Math.sin(k.time() * 3 + fase) * 3; // flota suavemente
@@ -373,7 +422,7 @@ export function cargarJuego(k) {
             z(201),
         ]);
         add([
-            text("WASD/Flechas: mover   E: abrir   TAB: inventario   F2: zonas   ESC: menú", {
+            text("WASD/Flechas: mover   E: abrir   TAB: inventario  ESC: menú", {
                 size: 14,
                 font: "monospace",
             }),
@@ -396,10 +445,42 @@ export function cargarJuego(k) {
             opacity(1),
             z(1000),
         ]);
-        tween(1, 0, 0.4, (v) => (velo.opacity = v));
+        if (!datos.despertar) tween(1, 0, 0.4, (v) => (velo.opacity = v));
  
         // Mensaje al volver de un puzzle o minijuego
         if (datos.mensaje) wait(0.6, () => decir(datos.mensaje));
+
+        // Al empezar la partida: el protagonista despierta en el sótano, habla y sale la pantalla de controles
+        if (datos.despertar) {
+            ocupado = true;
+            const parpadoArriba = add([rect(W, H / 2), pos(0, 0), color(0, 0, 0), z(990)]);
+            const parpadoAbajo = add([rect(W, H / 2), pos(0, H / 2), color(0, 0, 0), z(990)]);
+            const parpados = (f) => {   // 0 cerrados, 1 abiertos del todo
+                parpadoArriba.pos.y = -(H / 2) * f;
+                parpadoAbajo.pos.y = H / 2 + (H / 2) * f;
+            };
+            parpados(0);
+            const aParpados = (de, a, t) => tween(de, a, t, parpados);
+            tween(1, 0, 0.8, (v) => (velo.opacity = v));
+            wait(0.8, () => aParpados(0, 0.25, 0.9));
+            wait(2.0, () => aParpados(0.25, 0, 0.5));
+            wait(2.9, () => aParpados(0, 0.6, 0.9));
+            wait(4.1, () => aParpados(0.6, 0.1, 0.5));
+            wait(4.9, () => aParpados(0.1, 1, 1.2));
+            wait(6.4, () => {
+                destroy(parpadoArriba);
+                destroy(parpadoAbajo);
+                dialogo.hablar(
+                    [
+                        { texto: "Vlad despierta aturdido dentro de una habitación desconocida. Mientras recupera el conocimiento, comienza a observar lo que lo rodea y se da cuenta de que está atrapado en una especie de sala de tortura." },
+                        { quien: "Vlad", texto: "Mierda... Tengo que salir de aquí cuanto antes y llegar a Ashley." },
+                        { texto: "Vlad observa su nueva prisión mientras intenta encontrar una manera de escapar." },
+                        { texto: "Vlad comienza a explorar la habitación en busca de una manera de escapar." },
+                    ],
+                    () => controles.mostrar(() => { ocupado = false; }),
+                );
+            });
+        }
  
         function irA(destino) {
             ocupado = true;
@@ -424,7 +505,7 @@ export function cargarJuego(k) {
         // Cofre: si el puzzle no está resuelto, entra al puzzle; si ya lo está, queda vacío
         function abrirCofre(c) {
             if (progreso[c.puzzle]) {
-                decir("El cofre está vacío.");
+                hablar("El cofre está vacío.");
                 return;
             }
             irA({
@@ -444,6 +525,22 @@ export function cargarJuego(k) {
             }
             if (puerta.tipo === "escalera") {
                 irA(puerta.destino);
+                return;
+            }
+            if (puerta.directa) {   // puerta sin animación: se cruza directo (antes resuelve su minijuego, si tiene)
+                const pendiente = (puerta.minijuegos || []).find((m) => !progreso[m.id]);
+                if (pendiente) {
+                    irA({
+                        escena: pendiente.intro || pendiente.escena,
+                        datos: {
+                            id: pendiente.id,
+                            escena: pendiente.escena,
+                            volver: { sala: salaId, spawn: [jugador.pos.x / S, jugador.pos.y / S] },
+                        },
+                    });
+                } else {
+                    irA(puerta.destino);
+                }
                 return;
             }
  
@@ -510,11 +607,10 @@ export function cargarJuego(k) {
                     t += dt();
                     hoja.pos.x = xBase + Math.sin(t * 60) * 3;
                 });
-                decir(puerta.mensaje);
                 wait(0.5, () => {
                     sacudir.cancel();
                     quitar();
-                    ocupado = false;
+                    hablar(puerta.mensaje || "No se abre.");
                 });
                 return;
             }
@@ -524,10 +620,12 @@ export function cargarJuego(k) {
                 const pendiente = lista.find((m) => !progreso[m.id]);
                 if (pendiente) {
                     // Entra al minijuego que toca y vuelve a este mismo lugar al terminar
+                    // Si tiene "intro", primero va a esa escena (diálogo) y ella entra al minijuego
                     irA({
-                        escena: pendiente.escena,
+                        escena: pendiente.intro || pendiente.escena,
                         datos: {
                             id: pendiente.id,
+                            escena: pendiente.escena,
                             volver: { sala: salaId, spawn: [jugador.pos.x / S, jugador.pos.y / S] },
                         },
                     });
@@ -535,8 +633,8 @@ export function cargarJuego(k) {
                     irA(puerta.destino);
                 } else {
                     const resuelto = lista.length > 0;
-                    decir((resuelto && puerta.mensajeAbierta) || puerta.mensaje || "No hay nada aquí.");
-                    wait(1.3, () => {
+                    const texto = (resuelto && puerta.mensajeAbierta) || puerta.mensaje || "No hay nada aquí.";
+                    dialogo.hablar([texto], () => {
                         reproducir(true, () => {
                             quitar();
                             ocupado = false;
@@ -561,15 +659,15 @@ export function cargarJuego(k) {
  
         onKeyPress("f2", () => (depurar = !depurar));
         onKeyPress("escape", () => {
+            if (dialogo.abierto() || controles.abierto()) return;
             if (inv.estaAbierto()) inv.cerrar();
             else go("menu");
         });
  
-        // PRUEBA: F3 te da el siguiente objeto del catálogo (bórralo cuando ya no lo necesites)
-        onKeyPress("f3", () => {
+       /* onKeyPress("f4", () => {
             const nuevo = Object.keys(OBJETOS).find((id) => agregarObjeto(id));
             decir(nuevo ? `Obtuviste: ${OBJETOS[nuevo].nombre}` : "Ya tienes todos los objetos");
-        });
+        });*/
  
         //  Movimiento
         const VELOCIDAD = 200;
