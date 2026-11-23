@@ -1,32 +1,63 @@
 import { colores } from "./colores.js";
 
+// Cada objeto puede tener un dibujo:
+//   archivo: la imagen    tam: [ancho, alto] de la imagen en píxeles    piso: tamaño al estar en el piso
+// Sin "archivo" se ve como un cuadro de "color".
 export const OBJETOS = {
     nota_1: {
         nombre: "Nota 1",
         descripcion: "Circulo (1)",
         color: "#e8892b",
+        archivo: "assets/Notas/Nota1.png",
+        tam: [60, 77],
+        piso: 46,
     },
     nota_2: {
         nombre: "Nota 2",
         descripcion: "Rectángulo (4)",
         color: "#e8892b",
+        archivo: "assets/Notas/Nota2.png",
+        tam: [60, 77],
+        piso: 46,
     },
     llave_hierro: {
-        nombre: "Llave de hierro",
+        nombre: "Llave de alfil",
         descripcion: "Una llave pesada, de hierro oscuro. La Torre la custodiaba.",
         color: "#9aa3ad",
+        archivo: "assets/llaves/llavealfil.png",
+        tam: [15, 14],
+        piso: 30,
     },
     llave: {
-        nombre: "Llave",
+        nombre: "Llave torre",
         descripcion: "Una llave pequeña y antigua. Debe abrir una puerta de madera.",
         color: "#f2d11e",
+        archivo: "assets/llaves/llavecofre.png",
+        tam: [15, 14],
+        piso: 30,
     },
 };
+
+// Carga los dibujos de los objetos (se llama una vez desde juego.js). El sprite de cada uno se llama "obj_<id>".
+export function cargarIconos(k) {
+    for (const [id, def] of Object.entries(OBJETOS)) {
+        if (!def.archivo) continue;
+        k.loadSprite(`obj_${id}`, def.archivo, { filter: "nearest" });
+        def.icono = `obj_${id}`;
+    }
+}
+
+// Tamaño [ancho, alto] de un objeto dibujado para que quepa en un cuadro de lado "max", sin deformarse
+export function ajustar(def, max) {
+    const [w, h] = def.tam || [1, 1];
+    const e = max / Math.max(w, h);
+    return [w * e, h * e];
+}
  
 
 const MAX_OBJETOS = 12;
-const objetos = []; // ids de los objetos que lleva el jugador
-const recogidos = new Set(); // objetos que ya se recogieron alguna vez (no vuelven a salir en el piso)
+const objetos = (globalThis.__objetos ??= []); // ids de los objetos que lleva el jugador
+const recogidos = (globalThis.__recogidos ??= new Set()); // objetos que ya se recogieron alguna vez (no vuelven a salir en el piso)
  
 export function agregarObjeto(id) {
     if (!OBJETOS[id]) return false;           // no existe en el catálogo
@@ -148,8 +179,9 @@ export function crearInventario(k, opciones = {}) {
  
             // Ícono: un cuadro de color con la inicial (se cambiara cuando se tenga el sprite)
             if (obj.icono) {
+                const [iw, ih] = ajustar(obj, 64);
                 capa.add([
-                    sprite(obj.icono, { width: 64, height: 64 }),
+                    sprite(obj.icono, { width: iw, height: ih }),
                     pos(sx + CASILLA / 2, sy + 46),
                     anchor("center"),
                     z(3),
