@@ -1,6 +1,6 @@
 import { colores } from "./colores.js";
-import { agregarObjeto, tieneObjeto, OBJETOS } from "./inventario.js";
-import { progreso } from "./minijuego.js";
+import { agregarObjeto, tieneObjeto, OBJETOS } from "./Inventario.js";
+import { progreso } from "./Minijuego.js";
 
 //  Figuras: 0 círculo, 1 cuadrado, 2 triángulo, 3 rectángulo.(nota para mi jaja)
 
