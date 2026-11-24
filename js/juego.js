@@ -1,7 +1,7 @@
 import { colores } from "./colores.js";
 import { crearInventario, agregarObjeto, tieneObjeto, yaRecogido, OBJETOS, cargarIconos, ajustar } from "./Inventario.js";
 import { progreso } from "./Minijuego.js";
-import { crearDialogo } from "./Dialogo.js";
+import { crearDialogo, HABLANTES } from "./Dialogo.js";
 import { crearControles } from "./Controles.js";
  
 // Todas las medidas de SALAS están en el tamaño de tus imágenes: 640 x 360.
@@ -119,7 +119,7 @@ const SALAS = {
                     { escena: "minijuego", id: "madera" },  // el círculo (con la llave)
                     { escena: "torre", id: "torre", intro: "torre_intro" },  // La Torre (después de abrirla), con su diálogo antes
                 ],
-                mensajeAbierta: "Ya derrotaste a La Torre. (Aquí irá lo que sigue.)",
+                mensajeAbierta: `Ya derrotaste a ${HABLANTES.Kareem.nombre}. (Aquí irá lo que sigue.)`,
             },
             {
                 nombre: "Puerta derecha",
@@ -694,10 +694,10 @@ export function cargarJuego(k) {
             else go("menu");
         });
  
-       /* onKeyPress("f4", () => {
+        onKeyPress("f4", () => {
             const nuevo = Object.keys(OBJETOS).find((id) => agregarObjeto(id));
             decir(nuevo ? `Obtuviste: ${OBJETOS[nuevo].nombre}` : "Ya tienes todos los objetos");
-        });*/
+        });
  
         //  Movimiento
         const VELOCIDAD = 200;

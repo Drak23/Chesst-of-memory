@@ -20,6 +20,17 @@ const k = kaplay({
     pixelDensity: window.devicePixelRatio || 1, // más nítido en pantallas de alta resolución
 });
  
+// El cursor del ratón solo se ve en el menú y en el puzzle de memoria del sótano
+const CON_RATON = ["menu", "mensaje", "puzzle_memoria"];
+const estiloRaton = document.createElement("style");
+estiloRaton.textContent = "canvas.sin-raton { cursor: none !important; }";
+document.head.appendChild(estiloRaton);
+const escenaOriginal = k.scene;
+k.scene = (nombre, fn) => escenaOriginal(nombre, (...args) => {
+    k.canvas.classList.toggle("sin-raton", !CON_RATON.includes(nombre));
+    return fn(...args);
+});
+
 cargarMenu(k);   // escenas: "menu" y "mensaje"
 cargarPrologo(k);   // escena: "prologo" (cinemática del inicio)
 cargarPrologo2(k);  // escena: "prologo2" (segunda cinemática)

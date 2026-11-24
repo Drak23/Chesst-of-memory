@@ -1,6 +1,7 @@
 import { colores } from "./colores.js";
 import { crearDialogo, HABLANTES } from "./Dialogo.js";
 import { buscarHoja } from "./Hojas.js";
+import { progreso } from "./Minijuego.js";
 
 const SALA = {
     archivos: ["assets/Cinematicas/principio-Sheet.png"],
@@ -12,8 +13,8 @@ const MOSTRAR_ACOTACIONES = true;
 
 export function cargarPrologo2(k) {
     const {
-        add, rect, text, sprite, pos, anchor, color, opacity, scale, rotate, z, vec2,
-        wait, destroy, shake, tween, easings, go, scene, width, height,
+        add, rect, text, sprite, pos, anchor, color, opacity, outline, rgb, scale, rotate, z, vec2,
+        wait, destroy, shake, tween, easings, go, scene, width, height, onKeyPress, onUpdate, dt,
     } = k;
 
     const listos = {};
@@ -113,14 +114,111 @@ export function cargarPrologo2(k) {
         const huida = (seguir) => {
             const letrero = add([
                 text("¡CORRE!", { size: 120, font: "monospace" }),
-                pos(W / 2, H * 0.55),
+                pos(W / 2, H * 0.25),
                 anchor("center"),
                 color(colores.dorado),
                 z(700),
             ]);
             for (let i = 0; i < 5; i++) wait(i * 0.4, () => shake(10));
             wait(1.5, () => destroy(letrero));
-            wait(2.0, seguir);
+
+            // Minijuego: apretar rápido una sucesión de 5 flechas. Supera = progreso.escape true; si no, false (igual termina capturado)
+            progreso.escape = false;
+            const TIEMPO = 4.5;
+            const DIRS = [
+                { tecla: "left", alt: "a", simbolo: "←" },
+                { tecla: "right", alt: "d", simbolo: "→" },
+                { tecla: "up", alt: "w", simbolo: "↑" },
+                { tecla: "down", alt: "s", simbolo: "↓" },
+            ];
+            const pasos = Array.from({ length: 5 }, () => DIRS[Math.floor(Math.random() * DIRS.length)]);
+            wait(1.0, () => {
+                const objs = [];
+                const bw = 110;
+                const gap = 20;
+                const total = 5 * bw + 4 * gap;
+                const x0 = (W - total) / 2;
+                const y = H * 0.58;
+                let idx = 0;
+                let restante = TIEMPO;
+                let activo = true;
+
+                objs.push(add([
+                    text("¡Aprieta las flechas rápido!", { size: 28, font: "monospace" }),
+                    pos(W / 2, y - bw / 2 - 40),
+                    anchor("center"),
+                    color(colores.blanco),
+                    z(700),
+                ]));
+                const cajas = pasos.map((p, i) => {
+                    const cx = x0 + i * (bw + gap) + bw / 2;
+                    const caja = add([
+                        rect(bw, bw, { radius: 8 }),
+                        pos(cx, y),
+                        anchor("center"),
+                        color(20, 20, 28),
+                        outline(4, rgb(133, 128, 143)),
+                        z(700),
+                    ]);
+                    objs.push(caja);
+                    objs.push(add([
+                        text(p.simbolo, { size: 64, font: "monospace" }),
+                        pos(cx, y),
+                        anchor("center"),
+                        color(colores.blanco),
+                        z(701),
+                    ]));
+                    return caja;
+                });
+                const barra = add([rect(total, 12), pos(x0, y + bw / 2 + 30), color(colores.dorado), z(700)]);
+                objs.push(barra);
+
+                const pintar = () => {
+                    cajas.forEach((c, i) => {
+                        c.color = i < idx ? rgb(60, 160, 90) : rgb(20, 20, 28);
+                        c.outline.color = i === idx ? rgb(214, 181, 104) : rgb(133, 128, 143);
+                        c.outline.width = i === idx ? 8 : 4;
+                    });
+                };
+                pintar();
+
+                function terminar(logrado) {
+                    if (!activo) return;
+                    activo = false;
+                    progreso.escape = logrado;
+                    objs.push(add([
+                        text(logrado ? "¡LO LOGRAS!" : "¡TE ALCANZAN!", { size: 60, font: "monospace" }),
+                        pos(W / 2, y + bw / 2 + 90),
+                        anchor("center"),
+                        color(logrado ? rgb(100, 220, 130) : rgb(255, 80, 80)),
+                        z(700),
+                    ]));
+                    shake(logrado ? 8 : 20);
+                    wait(1.0, () => {
+                        objs.forEach((o) => destroy(o));
+                        seguir();
+                    });
+                }
+
+                onUpdate(() => {
+                    if (!activo) return;
+                    restante -= dt();
+                    barra.width = Math.max(0, total * (restante / TIEMPO));
+                    if (restante <= 0) terminar(false);
+                });
+                onKeyPress(["left", "right", "up", "down", "a", "d", "w", "s"], (tecla) => {
+                    if (!activo) return;
+                    if (tecla === pasos[idx].tecla || tecla === pasos[idx].alt) {
+                        idx++;
+                        pintar();
+                        if (idx >= pasos.length) terminar(true);
+                    } else {
+                        idx = 0;   // se equivocó: empieza la sucesión otra vez
+                        shake(6);
+                        pintar();
+                    }
+                });
+            });
         };
         const hayDibujo = (n) => typeof k.getSprite === "function" && !!k.getSprite(n) && !!k.getSprite(n).data;
         // La persecución (sobre fondo negro): La Torre alcanza al protagonista y lo deja inconsciente
@@ -140,17 +238,22 @@ export function cargarPrologo2(k) {
                 ? add([sprite(dibujoTorre, { height: 320 }), pos(-260, piso), anchor("bot"), rotate(0), z(21)])
                 : add([rect(150, 300), pos(-260, piso), anchor("bot"), rotate(0), color(80, 80, 100), z(21)]);
 
+            if (progreso.escape === true) torreSpr.hidden = true;   // si superó el escape, solo tropieza: La Torre no aparece
+
             tween(xProta, xFinal, 1.6, (v) => (prota.pos.x = v));
             tween(-260, xFinal - 170, 1.6, (v) => (torreSpr.pos.x = v), easings.easeInQuad);
             for (let i = 0; i < 4; i++) wait(i * 0.4, () => shake(8));
 
-            // Lo alcanza: golpe y el protagonista cae
+            // Lo alcanza: golpe y el protagonista cae (si superó el minijuego de escape, solo tropieza)
+            const tropieza = progreso.escape === true;
             wait(1.6, () => {
-                shake(40);
-                flash.opacity = 1;
-                tween(1, 0, 0.4, (v) => (flash.opacity = v));
+                shake(tropieza ? 18 : 40);
+                if (!tropieza) {
+                    flash.opacity = 1;
+                    tween(1, 0, 0.4, (v) => (flash.opacity = v));
+                }
                 const letrero = add([
-                    text("¡PAM!", { size: 120, font: "monospace" }),
+                    text(tropieza ? "¡TROPIEZA!" : "¡PAM!", { size: tropieza ? 90 : 120, font: "monospace" }),
                     pos(W / 2, H * 0.3),
                     anchor("center"),
                     color(colores.dorado),
@@ -197,29 +300,29 @@ export function cargarPrologo2(k) {
             ...acot("Una tercera voz, más autoritaria, interrumpe la conversación."),
             { quien: "Vlad", texto: "¿Quiénes... quiénes son ustedes?" },
             { accion: luz(0.55) },
-            { quien: "Albion", texto: "Es cierto, disculpa mis modales. Soy el rey Albion, segundo al mando de la familia Lamburgo. Y tú, forastero, eres nuestro invitado." },
-            { quien: "Ramberry", texto: "¡Y yo soy la primogénita de la familia Lamburgo! Ramberry! Jijiji. Y desde ahora serás mi nueva mascota. ¡¿Verdad, papá?!" },
+            { quien: "Albion", texto: `Es cierto, disculpa mis modales. Soy el rey ${Albion}, segundo al mando de la familia Lamburgo. Y tú, forastero, eres nuestro invitado.` },
+            { quien: "Ramberry", texto: `¡Y yo soy la primogénita de la familia Lamburgo! ¡${Ramberry}! Jijiji. Y desde ahora serás mi nueva mascota. ¡¿Verdad, papá?!` },
             { accion: luz(0.35) },
-            { quien: "v_Kareem", texto: "Señorita Ramberry, cuide sus modales." },
-            { quien: "Ramberry", texto: "Ay, Kareem, jijiji. ¡No seas tan amargado!" },
+            { quien: "v_Kareem", texto: `Señorita ${Ramberry}, cuide sus modales.` },
+            { quien: "Ramberry", texto: `Ay, ${Kareem}, jijiji. ¡No seas tan amargado!` },
             { quien: "Kareem", texto: "Señorita, este forastero podría ser peligroso. Lo mejor sería eliminarlo de inmediato." },
             { quien: "Ramberry", texto: "¡Wha, wha! ¡No, no, no! Jijiji. ¡Él es mío! ¡Mío para jugar!" },
-            ...acot("Ramberry se acerca lentamente a Vlad con una sonrisa."),
+            ...acot(`${Ramberry} se acerca lentamente a Vlad con una sonrisa.`),
             { quien: "Ramberry", texto: "¿Verdad que sí, mascota?" },
             { quien: "Vlad", texto: "¡Aléjate de mí, maldita niña!" },
             { quien: "Ramberry", texto: "Ay, ay, ay..." },
-            ...acot("Ramberry chasquea la lengua y observa al protagonista con una expresión de disgusto."),
+            ...acot(`${Ramberry} chasquea la lengua y observa al protagonista con una expresión de disgusto.`),
             { quien: "Ramberry", texto: "Parece que tendré que entrenarte bien, lindura. No debes morder a tu dueña, jijiji." },
             { quien: "v_Beryl", texto: "Silencio, mis niños." },
             { accion: terror },
             ...acot("Una voz tranquila, pero autoritaria, se escucha desde el fondo de la habitación. Todos guardan silencio de inmediato y sus rostros muestran un profundo terror."),
-            { quien: "v_Beryl", texto: "Kareem, encárgate del forastero." },
+            { quien: "v_Beryl", texto: `${Kareem}, encárgate del forastero.` },
             { quien: "Kareem", texto: "Será un placer, mi señora." },
             { accion: empujon },   // *se acerca rápidamente al prota y lo empuja fuerte, rompiendo la silla*
-            ...acot("Kareem se acerca rápidamente a Vlad y lo empuja con tanta fuerza que la silla en la que está atado se rompe."),
+            ...acot(`${Kareem} se acerca rápidamente a Vlad y lo empuja con tanta fuerza que la silla en la que está atado se rompe.`),
             { quien: "Kareem", texto: "Este será tu final, forastero." },
             { quien: "Vlad", texto: "Eso lo dudo." },
-            ...acot("Vlad aprovecha el momento para escapar de la habitación y comienza a correr por el pasillo mientras Kareem lo persigue."),
+            ...acot(`Vlad aprovecha el momento para escapar de la habitación y comienza a correr por el pasillo mientras ${Kareem} lo persigue.`),
             { accion: huida },
             { accion: alcance },   // Kareem lo alcanza y lo desmaya
             ...acot("Finalmente, Vlad es capturado y encerrado en un calabozo."),

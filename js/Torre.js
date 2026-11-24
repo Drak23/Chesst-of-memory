@@ -1,7 +1,7 @@
 import { colores } from "./colores.js";
 import { agregarObjeto, OBJETOS } from "./Inventario.js";
 import { progreso } from "./Minijuego.js";
-import { crearDialogo } from "./Dialogo.js";
+import { crearDialogo, HABLANTES } from "./Dialogo.js";
  
 
 const RECOMPENSA = "llave_hierro";
@@ -641,16 +641,16 @@ export function cargarTorre(k) {
                 { quien: "Vlad", texto: "Agh... Huele fatal aquí." },
                 { quien: "Kareem", texto: "Vaya, vaya... Parece que una rata inmunda escapó de su jaula. Una rata a la que me encantará torturar." },
                 { quien: "Vlad", texto: "Aquí la única rata que veo eres tú." },
-                { quien: "Kareem", texto: "Mis amos me ordenaron matarte, pero la señorita Ramberry insistió en mantenerte con vida. Por eso tuve que encerrarte." },
+                { quien: "Kareem", texto: `Mis amos me ordenaron matarte, pero la señorita ${HABLANTES.Ramberry.nombre} insistió en mantenerte con vida. Por eso tuve que encerrarte.` },
                 { quien: "Kareem", texto: "Pero ahora no hay nadie que me impida acabar contigo." },
                 {
                     quien: "Vlad",
                     texto: casiEscapa
-                        ? "La última vez escapé de ti. ¿Todavía te duele?"
-                        : "La última vez casi conseguí escapar de ti. Esta vez no pienso fallar.",
+                        ? "La última vez casi conseguí escapar de ti. Esta vez no pienso fallar."
+                        : "La última vez escapé de ti. ¿Todavía te duele?",
                 },
                 { quien: "Kareem", texto: "¡Insolente! No importa..." },
-                { texto: "Kareem salta desde el segundo piso de la habitación y cae frente a Vlad." },
+                { texto: `${HABLANTES.Kareem.nombre} salta desde el segundo piso de la habitación y cae frente a Vlad.` },
                 { accion: caerTorre },   // *salta del segundo piso y cae*
                 { quien: "Kareem", texto: "¡Porque aquí es donde morirás!" },
             ], comenzar);
