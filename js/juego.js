@@ -694,10 +694,10 @@ export function cargarJuego(k) {
             else go("menu");
         });
  
-        onKeyPress("f4", () => {
+        /* onKeyPress("f4", () => {
             const nuevo = Object.keys(OBJETOS).find((id) => agregarObjeto(id));
             decir(nuevo ? `Obtuviste: ${OBJETOS[nuevo].nombre}` : "Ya tienes todos los objetos");
-        });
+        });*/
  
         //  Movimiento
         const VELOCIDAD = 200;
