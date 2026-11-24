@@ -4,8 +4,8 @@ import { colores } from "./colores.js";
 export const HABLANTES = {
     Vlad: { nombre: "Vlad", color: "#d6b568" },
     Kareem: { nombre: "Kareem", color: "#0842ff" },
-    npc1: { nombre: "NPC 1", color: "#8fd06f" },   // el cochero (verde en el carruaje). Cámbiale el nombre cuando lo tenga
-    npc2: { nombre: "NPC 2", color: "#b57ad6" },   // la acompañante (morada en el carruaje)
+    npc1: { nombre: "Drak", color: "#8fd06f" },   // el cochero (verde en el carruaje). Cámbiale el nombre cuando lo tenga
+    npc2: { nombre: "Chrome", color: "#b57ad6" },   // la acompañante (morada en el carruaje)
     // La familia Lamburgo (los nombres son provisionales: cámbialos aquí y se actualizan en los diálogos)
     Albion: { nombre: "Albion", color: "#e82121" },
     Ramberry: { nombre: "Ramberry", color: "#f49427" },
