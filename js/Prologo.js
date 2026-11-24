@@ -21,6 +21,10 @@ const CARRETA = {
 };
 
 // Las acotaciones (*...*) que están solas se muestran como narración.
+// Dibujos quietos del carruaje cuando se van la acompañante y luego el conductor (opcionales)
+const CARRETA_SIN_ACOMPANANTE = "assets/Cinematicas/carruaje sin primer personaje.png";
+const CARRETA_SIN_NADIE = "assets/Cinematicas/carrueje sin nadie.png";
+
 const MOSTRAR_ACOTACIONES = true;
 
 export function cargarPrologo(k) {
@@ -74,6 +78,23 @@ export function cargarPrologo(k) {
     }
     buscar("prologo_fondo", FONDO.archivos, FONDO.cuadros, "correr", FONDO.fps);
     buscar("prologo_carreta", CARRETA.archivos, CARRETA.cuadros, "rodar", CARRETA.fps);
+
+    function cargarQuieto(nombre, archivo) {
+        if (typeof fetch !== "function") return;
+        fetch(archivo, { method: "HEAD" })
+            .then((r) => {
+                if (!r.ok) {
+                    console.warn(`Falta el dibujo: ${archivo}`);
+                    return;
+                }
+                const carga = k.loadSprite(nombre, archivo, { filter: "nearest" });
+                if (carga && typeof carga.then === "function") carga.then(() => (listos[nombre] = true)).catch(() => {});
+                else setTimeout(() => (listos[nombre] = true), 500);
+            })
+            .catch(() => {});
+    }
+    cargarQuieto("prologo_carreta_sin_acompanante", CARRETA_SIN_ACOMPANANTE);
+    cargarQuieto("prologo_carreta_sin_nadie", CARRETA_SIN_NADIE);
 
     scene("prologo", () => {
         const W = width();
@@ -150,6 +171,16 @@ export function cargarPrologo(k) {
         const velocidad = (n) => {
             if (fondo) fondo.animSpeed = n;
             if (listos.prologo_carreta) carreta.animSpeed = n;
+        };
+
+        // Cambia el dibujo del carruaje (ya detenido) cuando alguien se va
+        const cambiarCarreta = (nombre) => (seguir) => {
+            if (listos[nombre]) {
+                const x = carreta.pos.x;
+                destroy(carreta);
+                carreta = add([sprite(nombre, { width: CW, height: CH }), pos(x, yCarreta), z(10)]);
+            }
+            seguir();
         };
 
         // Acciones del guion 
@@ -262,6 +293,7 @@ export function cargarPrologo(k) {
             { quien: "npc1", texto: "Yo intentaré hacer un agujero para colocarla." },
             { quien: "npc2", texto: "Como sea..." },
             ...acot("La acompañante se aleja del carruaje y se adentra en el bosque cercano para buscar una rama."),
+            { accion: cambiarCarreta("prologo_carreta_sin_acompanante") },
             { quien: "npc1", texto: "No vaya a ayudar demasiado, forastero." },
             ...acot("Vlad permanece sentado en el carruaje y se limita a suspirar."),
             { quien: "npc1", texto: "Claro... Debí suponerlo." },
@@ -273,6 +305,7 @@ export function cargarPrologo(k) {
             ...acot("El conductor suspira y se dirige a Vlad."),
             { quien: "npc1", texto: "Forastero, ahora regreso. Voy a ver qué le pasó." },
             ...acot("El conductor se adentra en el bosque, siguiendo el mismo camino que toma su acompañante."),
+            { accion: cambiarCarreta("prologo_carreta_sin_nadie") },
             { quien: "Vlad", texto: "Como sea..." },
             { accion: pasaTiempo },
             ...acot("Pasa otro rato, pero ninguno de los dos regresa. La tormenta continúa y el bosque permanece en silencio."),
