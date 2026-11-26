@@ -52,10 +52,10 @@ export function cargarPuzzle(k) {
             color(46, 204, 113),
         ]);
         add([
-            text("←/→: elegir     ↑/↓ o ESPACIO: cambiar figura     ESC: salir", { size: 16, font: "monospace" }),
+            text("←/→: Cambiar Selección   ↑/↓ : Elegir figura     ESC: salir", { size: 16, font: "monospace" }),
             pos(cx, height() - 50),
             anchor("center"),
-            color(colores.gris),
+            color(colores.rojo),
         ]);
  
         // x del centro de la casilla i

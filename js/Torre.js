@@ -445,12 +445,12 @@ export function cargarTorre(k) {
  
         const hudEtapa = add([text("ETAPA: 1 (APRENDIZAJE)", { size: tam(16), font: "monospace" }), pos(gx(240), gy(40)), color(0, 240, 255)]);
         const hudProgreso = add([text("Entregas: 0 / 2  |  Item: NINGUNO", { size: tam(14), font: "monospace" }), pos(gx(240), gy(80)), color(255, 255, 100)]);
-        const hudSalud = add([text("Salud Implícita: [ III ]", { size: tam(14), font: "monospace" }), pos(gx(240), gy(115)), color(100, 255, 100)]);
-        const hudMsg = add([text("Narrador: 'Lleva la reliquia desde A hasta B'", { size: tam(13), font: "monospace" }), pos(gx(240), gy(150)), color(160, 160, 180)]);
+        const hudSalud = add([text("Salud: [ III ]", { size: tam(14), font: "monospace" }), pos(gx(240), gy(115)), color(100, 255, 100)]);
+        const hudMsg = add([text("Narrador: 'Lleva la reliquia desde A hasta B'", { size: tam(13), font: "monospace" }), pos(gx(240), gy(150)), color(260, 160, 180)]);
  
         function actualizarHUD(evento) {
             const barras = ["", "[ I ]", "[ II ]", "[ III ]"];
-            hudSalud.text = `Salud Implícita: ${barras[estado.playerHealth] || "[ AGOTADA ]"}`;
+            hudSalud.text = `Salud: ${barras[estado.playerHealth] || "[ AGOTADA ]"}`;
  
             if (evento === "item_picked") {
                 hudProgreso.text = `Entregas: ${estado.deliveries} / ${estado.requiredDeliveries}  |  Item: LLEVAS RELIQUIA`;

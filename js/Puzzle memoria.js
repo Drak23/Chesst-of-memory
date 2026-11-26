@@ -37,7 +37,7 @@ export function cargarPuzzleMemoria(k) {
         const ph = 600;
         const px = cx - pw / 2;
         const py = (H - ph) / 2;
-        add([rect(pw, ph), pos(px, py), color(41, 33, 30), outline(4, rgb(117, 88, 59))]);
+        add([rect(pw, ph), pos(px, py), color(41, 33, 30), outline(4, rgb(117, 59, 59))]);
 
         const rondaTexto = add([
             text("Tres pruebas aguardan...", { size: 26, font: "Georgia" }),
@@ -91,7 +91,7 @@ export function cargarPuzzleMemoria(k) {
             text("CLIC: elegir luz     ESC: salir", { size: 16, font: "monospace" }),
             pos(cx, H - 40),
             anchor("center"),
-            color(colores.gris),
+            color(colores.rojo),
         ]);
 
         // Luces 

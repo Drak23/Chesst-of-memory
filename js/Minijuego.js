@@ -45,10 +45,10 @@ export function cargarMinijuego(k) {
             color(colores.dorado),
         ]);
         add([
-            text("CLIC / ESPACIO: fijar     ESC: salir", { size: 16, font: "monospace" }),
+            text("ESPACIO: Insertar     ESC: Salir", { size: 16, font: "monospace" }),
             pos(cx, height() - 50),
             anchor("center"),
-            color(colores.gris),
+            color(colores.rojo),
         ]);
  
         // Posición de un punto del aro (0° = arriba, giro hacia la derecha)

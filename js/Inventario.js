@@ -177,7 +177,7 @@ export function crearInventario(k, opciones = {}) {
             if (!id) continue;
             const obj = OBJETOS[id];
  
-            // Ícono: un cuadro de color con la inicial (se cambiara cuando se tenga el sprite)
+            // Ícono: el sprite
             if (obj.icono) {
                 const [iw, ih] = ajustar(obj, 64);
                 capa.add([
@@ -247,7 +247,7 @@ export function crearInventario(k, opciones = {}) {
  
         // Ayuda
         capa.add([
-            text("Flechas/WASD: elegir    TAB o ESC: cerrar", { size: 16, font: "monospace" }),
+            text("Flechas/WASD: elegir    TAB: cerrar", { size: 16, font: "monospace" }),
             pos(px + 40, py + ph - 40),
             color(colores.gris),
             z(2),

@@ -61,8 +61,8 @@ const SALAS = {
                 nombre: "Puerta alfil",
                 rect: [528, 92, 76, 180],
                 zona: [528, 236, 590, 300],
-                destino: { escena: "fin_demo" },   // con la llave del alfil se abre y termina la demo
                 requiere: "llave_hierro",          // objeto necesario para abrirla
+                destino: { escena: "fin_demo" },   // con la llave del alfil se abre y termina la demo
                 animacion: { imagen: "assets/Puertas/animationdoor2-Sheet.png", cuadros: 4, pos: [521, 86], fps: 8 },
                 mensaje: { quien: "Vlad", texto: "Cerrada... Bueno, probaré con la otra." },
             },
@@ -447,12 +447,12 @@ export function cargarJuego(k) {
             text("", { size: 26, font: "monospace" }),
             pos(W / 2, 50),
             anchor("center"),
-            color(colores.dorado),
+            color(colores.rojo),
             outline(5, k.rgb(17, 16, 25)),
             z(201),
         ]);
         add([
-            text("WASD/Flechas: mover   E: abrir   TAB: inventario  ESC: menú", {
+            text("WASD/Flechas: mover   E: abrir   TAB: inventario", {
                 size: 14,
                 font: "monospace",
             }),
